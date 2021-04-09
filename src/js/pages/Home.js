@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from "react-router-dom";
-import '../../scss/components/home.scss'
 import Button from '../components/Button'
-
 
 
 export class Home extends Component {
