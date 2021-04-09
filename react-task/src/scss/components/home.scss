@@ -1,0 +1,15 @@
+.home {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: #ddd;
+}
+
+.home__greet{
+  text-transform: uppercase;
+  margin: 1rem;
+}

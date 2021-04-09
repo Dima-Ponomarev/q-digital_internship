@@ -1,12 +1,24 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+import Home from './pages/Home'
 import '../scss/app.scss'
 
 export class App extends Component {
   render() {
     return (
-      <div>
-         <h1>Some text</h1>
-      </div>
+      <Router> 
+        <Switch>
+            <Route exact path='/'>
+              <Home />
+            </Route>
+            <Route path='/slider'>
+            </Route>
+        </Switch>
+      </Router>
     )
   }
 }
