@@ -1,22 +1,40 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { fetchImages } from '../redux/actions'
+import { setLocal, setFetched } from '../redux/actions'
 import Button from '../components/Button'
 
 export class Slider extends Component {
   state = {
-    index: 0
+    index: 0,
+    imageType: 'local'
+  }
+
+  importLocal = (r) => {
+    return r.keys().map(r)
   }
 
   componentDidMount() {
+    //getting images from server
     fetch('https://imagesapi.osora.ru/')
       .then(res => res.json())
-      .then(data => this.props.fetchImages(data))
+      .then(data => {
+        this.props.setFetched(data)
+      })
+
+    //gettin all local jpg images
+    const localImages = 
+      this.importLocal(require.context('../../img/', false, /\.jpg$/))
+      .map(item => item.default)
+    this.props.setLocal(localImages)
+
+    this.setState({
+      slider: this.props.local
+    })
   }
 
   onNext = () => {
     this.setState({
-      index: (this.state.index + 1) % this.props.images.length
+      index: (this.state.index + 1) % this.state.slider.length
     })
   }
 
@@ -27,23 +45,50 @@ export class Slider extends Component {
       })
     } else {
       this.setState({
-        index: this.props.images.length - 1
+        index: this.state.slider.length - 1
       })
     }
   }
 
+
+  //toggle displayed images
+  onSwitch = () => {
+    console.log(this.state.imageType)
+    if(this.state.imageType === 'local') {
+      this.setState({
+        imageType: 'server',
+        slider: this.props.server
+      })
+    } else {
+      this.setState({
+        imageType: 'local',
+        slider: this.props.local
+      })
+    }
+
+
+    console.log(this.state.imageType)
+  }
+
   render() {
+    if (!this.state.slider) {
+      this.setState({ slider: this.props.local })
+    }
     return (
       <main className='slider'>
         <div className='slider__wrapper'>
-          <Button text='prev' onChange={this.onPrev}/>
-          {this.props.images 
-          && (
-            <img className='slider__image' src={this.props.images[this.state.index]} alt='slider'/>
+          <Button text='prev' onClick={this.onPrev}/>
+          {this.state.slider && (
+            <img 
+              className='slider__image' 
+              src={this.state.slider[this.state.index]} 
+              alt='slider'/>
           )}
-          <Button text='next' onChange={this.onNext}/>
+          <Button text='next' onClick={this.onNext}/>
         </div>
-        <Button text='switch to local'/>
+        <Button 
+          text={this.state.imageType === 'local' ? 'Switch to remote' : 'Switch to local'} 
+          onClick={this.onSwitch}/>
         <Button text='back to main' type='link' to='/'/>
       </main>
     )
@@ -51,7 +96,11 @@ export class Slider extends Component {
 }
 
 const mapStateToProps = state => ({
-  images: state.images.images
+  local: state.images.local,
+  server: state.images.server
 })
 
-export default connect(mapStateToProps, { fetchImages })(Slider)
+export default connect(
+  mapStateToProps, 
+  { setLocal, setFetched }
+)(Slider)

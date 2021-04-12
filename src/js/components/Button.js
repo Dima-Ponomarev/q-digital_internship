@@ -11,7 +11,7 @@ export class Button extends Component {
       )
     }
     return (
-      <div className='button' onClick={this.props.onChange}>
+      <div className='button' onClick={this.props.onClick}>
         {this.props.text}
       </div>
     )
