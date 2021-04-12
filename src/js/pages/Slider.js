@@ -86,9 +86,11 @@ export class Slider extends Component {
           )}
           <Button text='next' onClick={this.onNext}/>
         </div>
-        <Button 
-          text={this.state.imageType === 'local' ? 'Switch to remote' : 'Switch to local'} 
-          onClick={this.onSwitch}/>
+        <div className='slider__switch-btn'>
+          <Button
+            text={this.state.imageType === 'local' ? 'Switch to remote' : 'Switch to local'} 
+            onClick={this.onSwitch}/>
+        </div>
         <Button text='back to main' type='link' to='/'/>
       </main>
     )
