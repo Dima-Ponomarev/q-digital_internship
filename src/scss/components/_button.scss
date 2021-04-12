@@ -1,4 +1,5 @@
 .button {
+  display: inline-block;
   background: #000;
   color: white;
   cursor: pointer;
@@ -6,5 +7,8 @@
   padding: 0.5rem 1.5rem;
   border: none;
 
-  text-decoration: underline;
+
+  &_link{
+    text-decoration: underline;
+  }
 }
