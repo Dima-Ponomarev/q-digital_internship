@@ -6,16 +6,13 @@ import {
 } from "react-router-dom";
 import { Provider } from 'react-redux'
 import Home from './pages/Home'
+import Slider from './pages/Slider'
 import Redux from './redux/index'
-import { applyMiddleware, createStore } from 'redux';
-import thunk from 'redux-thunk'
-
-const middleware = [thunk]
+import { createStore } from 'redux';
 
 const store = createStore(
   Redux.Reducers, 
   Redux.InitialState, 
-  applyMiddleware(...middleware)
 )
 
 export class App extends Component {
@@ -28,6 +25,7 @@ export class App extends Component {
                 <Home />
               </Route>
               <Route path='/slider'>
+                <Slider />
               </Route>
           </Switch>
         </Router>
