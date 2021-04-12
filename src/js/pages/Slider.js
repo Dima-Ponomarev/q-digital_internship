@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { setLocal, setFetched } from '../redux/actions'
 import Button from '../components/Button'
+import firstImage from '../../img/0.jpg'
+import secondImage from '../../img/1.jpg'
+import thirdImage from '../../img/2.jpg'
 
 export class Slider extends Component {
   state = {
@@ -22,14 +25,13 @@ export class Slider extends Component {
       })
 
     //gettin all local jpg images
-    const localImages = 
-      this.importLocal(require.context('../../img/', false, /\.jpg$/))
-      .map(item => item.default)
-    this.props.setLocal(localImages)
+    this.props.setLocal([firstImage, secondImage, thirdImage])
+  }
 
-    this.setState({
-      slider: this.props.local
-    })
+  componentDidUpdate() {
+    if (!this.state.slider) {
+      this.setState({ slider: this.props.local })
+    }
   }
 
   onNext = () => {
@@ -53,7 +55,6 @@ export class Slider extends Component {
 
   //toggle displayed images
   onSwitch = () => {
-    console.log(this.state.imageType)
     if(this.state.imageType === 'local') {
       this.setState({
         imageType: 'server',
@@ -65,15 +66,9 @@ export class Slider extends Component {
         slider: this.props.local
       })
     }
-
-
-    console.log(this.state.imageType)
   }
 
   render() {
-    if (!this.state.slider) {
-      this.setState({ slider: this.props.local })
-    }
     return (
       <main className='slider'>
         <div className='slider__wrapper'>
