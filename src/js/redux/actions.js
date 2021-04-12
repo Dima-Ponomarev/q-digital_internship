@@ -1,9 +1,15 @@
-import { FETCH_IMAGES } from './actionTypes'
+import { SET_LOCAL, SET_FETCHED } from './actionTypes'
 
-
-export function fetchImages(images) {
+export function setLocal(images) {
   return {
-    type: FETCH_IMAGES,
+    type: SET_LOCAL,
+    payload: images
+  }
+}
+
+export function setFetched(images) {
+  return {
+    type: SET_FETCHED,
     payload: images
   }
 }
