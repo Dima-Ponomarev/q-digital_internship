@@ -6,17 +6,18 @@ import {
 } from "react-router-dom";
 import { Provider } from 'react-redux'
 import Home from './pages/Home'
+<<<<<<< HEAD
 import ThreeScene from './components/ThreeScene'
+=======
+import Slider from './pages/Slider'
+>>>>>>> fe1a7095dde573bdbb1a15b9c9e7c263b01168a5
 import Redux from './redux/index'
-import { applyMiddleware, createStore } from 'redux';
-import thunk from 'redux-thunk'
-
-const middleware = [thunk]
+import { createStore } from 'redux';
 
 const store = createStore(
   Redux.Reducers, 
   Redux.InitialState, 
-  applyMiddleware(...middleware)
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 
 export class App extends Component {
@@ -35,6 +36,7 @@ export class App extends Component {
                 <div ref={ref => this.mount = ref}></div>
               </Route>
               <Route path='/slider'>
+                <Slider />
               </Route>
           </Switch>
         </Router>
