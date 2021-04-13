@@ -23,12 +23,12 @@ export default class ThreeScene {
     const plane = new THREE.Mesh( planeGeometry ,material )
     plane.rotateX( Math.PI - 1.2 ) 
     plane.rotateZ( Math.PI - 1.1 )
-    plane.position.set(0, -1.3, 0)
+    plane.position.set(0, -1.3, -1)
     this.#scene.add( plane )
   }
 
   drawSphere = () => {
-    const sphereGeometry = new THREE.SphereGeometry( 1.2, 45, 45 )
+    const sphereGeometry = new THREE.SphereGeometry( 1, 40, 40 )
     const edges = new THREE.EdgesGeometry( sphereGeometry )
 
     const material = new THREE.LineBasicMaterial( {
@@ -38,7 +38,7 @@ export default class ThreeScene {
 
     const line = new THREE.LineSegments( edges, material )
     line.rotateX(0.5)
-    line.position.set(0, 0, 0)
+    line.position.set(0, 0, 1)
 
     this.#scene.add( line )
 
