@@ -18,12 +18,12 @@ export default class ThreeScene {
     const plane = new THREE.Mesh( planeGeometry ,material )
     plane.rotateX( Math.PI - 1.2 ) 
     plane.rotateZ( Math.PI - 1.1 )
-    plane.position.set(0, -1, 0)
+    plane.position.set(0, -1.3, 0)
     this.#scene.add( plane )
   }
 
   drawSphere = () => {
-    const sphereGeometry = new THREE.SphereGeometry( 1, 45, 45 )
+    const sphereGeometry = new THREE.SphereGeometry( 1.2, 45, 45 )
     const edges = new THREE.EdgesGeometry( sphereGeometry )
 
     const material = new THREE.LineBasicMaterial( {
@@ -32,8 +32,10 @@ export default class ThreeScene {
     } );
 
     const line = new THREE.LineSegments( edges, material )
+    line.rotateX(0.5)
+    line.position.set(0, 0, 0)
 
-    this.#scene.add( line );
+    this.#scene.add( line )
 
     const rotate = () => {
       requestAnimationFrame( rotate )
@@ -59,7 +61,7 @@ export default class ThreeScene {
 
     this.#camera.position.z = 5
 
-    this.drawPlane(this.#scene);
+    this.drawPlane(this.#scene)
     this.drawSphere(this.#scene)
 
     this.#renderer.render( this.#scene, this.#camera )
