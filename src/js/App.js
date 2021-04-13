@@ -6,11 +6,8 @@ import {
 } from "react-router-dom";
 import { Provider } from 'react-redux'
 import Home from './pages/Home'
-<<<<<<< HEAD
 import ThreeScene from './components/ThreeScene'
-=======
 import Slider from './pages/Slider'
->>>>>>> fe1a7095dde573bdbb1a15b9c9e7c263b01168a5
 import Redux from './redux/index'
 import { createStore } from 'redux';
 
