@@ -5,7 +5,6 @@ import {
   Route,
 } from "react-router-dom";
 import { Provider } from 'react-redux'
-import Home from './pages/Home'
 import ThreeScene from './components/ThreeScene'
 import Slider from './pages/Slider'
 import Redux from './redux/index'
@@ -19,8 +18,7 @@ const store = createStore(
 
 export class App extends Component {
   componentDidMount() {
-    const three = new ThreeScene(this.mount)
-    three.init()
+    new ThreeScene(this.mount)
   }
 
 
@@ -30,7 +28,7 @@ export class App extends Component {
         <Router> 
           <Switch>
               <Route exact path='/'>
-                <div ref={ref => this.mount = ref}></div>
+                <div className='canvas' ref={ref => this.mount = ref}></div>
               </Route>
               <Route path='/slider'>
                 <Slider />

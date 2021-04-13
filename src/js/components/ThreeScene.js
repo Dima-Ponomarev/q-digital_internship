@@ -4,9 +4,14 @@ export default class ThreeScene {
   #renderer
   #scene
   #camera
+  #sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+  }
 
   constructor(root){
     this.root = root
+    this.init()
   }
 
   drawPlane = () => {
@@ -50,13 +55,13 @@ export default class ThreeScene {
     this.#scene = new THREE.Scene()
     this.#camera = new THREE.PerspectiveCamera( 
       75, 
-      window.innerWidth / window.innerHeight, 
+      this.#sizes.width / this.#sizes.height, 
       0.1, 
       1000 
-    );
+    )
 
     this.#renderer = new THREE.WebGLRenderer({ antialias: true })
-    this.#renderer.setSize( window.innerWidth, window.innerHeight )
+    this.#renderer.setSize( this.#sizes.width, this.#sizes.height )
     this.root.appendChild( this.#renderer.domElement )
 
     this.#camera.position.z = 5
@@ -65,6 +70,16 @@ export default class ThreeScene {
     this.drawSphere(this.#scene)
 
     this.#renderer.render( this.#scene, this.#camera )
+
+    window.addEventListener('resize', () => {
+      this.#sizes.width = window.innerWidth
+      this.#sizes.height = window.innerHeight
+
+      this.#camera.aspect = this.#sizes.width / this.#sizes.height
+      this.#camera.updateProjectionMatrix()
+
+      this.#renderer.setSize( this.#sizes.width, this.#sizes.height )
+    })
   }
 
 
