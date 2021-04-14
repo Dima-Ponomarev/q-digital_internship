@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import image from '../../img/locations/pano_1.png'
+import data from './data'
 
 export default class ThreePanorama{
   renderer
@@ -20,7 +20,7 @@ export default class ThreePanorama{
     geometry.scale( - 1, 1, 1 )
     const loader = new THREE.TextureLoader()
     const material = new THREE.MeshBasicMaterial({
-       map: loader.load(image)
+       map: loader.load(data[0].path)
     });
     return new THREE.Mesh( geometry, material )
     

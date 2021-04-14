@@ -1,7 +1,7 @@
 const data = [
   {
     id: 0,
-    path: "../../img/locations/pano_1.png",
+    path: "/locations/pano_1.png",
     coords: {
       x: 0,
       y: 0,
@@ -12,7 +12,7 @@ const data = [
   },
   {
     id: 1,
-    path: "../../img/locations/pano_2.png",
+    path: "/locations/pano_2.png",
     coords: {
       x: 1,
       y: 0,
@@ -24,7 +24,7 @@ const data = [
   },
   {
     id: 2,
-    path: "../../img/locations/pano_3.png",
+    path: "/locations/pano_3.png",
     coords: {
       x: 1.5,
       y: 0,
@@ -36,7 +36,7 @@ const data = [
   },
   {
     id: 3,
-    path: "../../img/locations/pano_4.png",
+    path: "/locations/pano_4.png",
     coords: {
       x: -1,
       y: 0,
@@ -47,7 +47,7 @@ const data = [
   },
   {
     id: 5,
-    path: "../../img/locations/pano_2_2.png",
+    path: "/locations/pano_2_2.png",
     coords: {
       x: 1,
       y: 0,
@@ -59,7 +59,7 @@ const data = [
   },
   {
     id: 6,
-    path: "../../img/locations/pano_2_2_1.png",
+    path: "/locations/pano_2_2_1.png",
     coords: {
       x: 1,
       y: 0,
@@ -71,7 +71,7 @@ const data = [
   },
   {
     id: 7,
-    path: "../../img/locations/pano_4_1.png",
+    path: "/locations/pano_4_1.png",
     coords: {
       x: -2,
       y: 0,
