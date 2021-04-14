@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import data from './data'
+import data from '../../../public/data'
 
 export default class ThreePanorama{
   #renderer
@@ -79,6 +79,9 @@ export default class ThreePanorama{
 
     const animate = () => {
       requestAnimationFrame( animate )
+
+      mainSphereMesh.rotation.y += 0.002 
+      arrowMesh.rotation.y += 0.002
 
       this.#renderer.render( this.#scene, this.#camera )
     };
