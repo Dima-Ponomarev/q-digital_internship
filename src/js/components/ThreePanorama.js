@@ -26,29 +26,46 @@ export default class ThreePanorama{
     
   }
 
+  drawArrow = () => {
+    const arrowShape = new THREE.Shape()
+    arrowShape.moveTo(1.5, 0 );
+    arrowShape.lineTo( 0, 0.5 );
+    arrowShape.lineTo( -1.5, 0 );
+    //arrowShape.lineTo( 1, 0 );
+
+    const geometry = new THREE.ShapeGeometry( arrowShape )
+    const material = new THREE.MeshBasicMaterial( { color: 0x750000 } )
+    const arrowMesh = new THREE.Mesh( geometry, material )
+    arrowMesh.position.y = -2.5
+    return arrowMesh
+  }
+
   init = () => {
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(
-      75, 
+      90, 
       this.#sizes.width / this.#sizes.height,
       0.1, 
       1000 
     )
     this.camera.target = new THREE.Vector3( 0, 0, 0 )
 
-    this.renderer = new THREE.WebGLRenderer()
+    this.renderer = new THREE.WebGLRenderer({ antialias: true })
     this.renderer.setSize( this.#sizes.width, this.#sizes.height )
     this.root.appendChild( this.renderer.domElement )
 
-    const sphere = this.drawSphere()
-    this.scene.add(sphere)
+    const sphereMesh = this.drawSphere()
+    this.scene.add(sphereMesh)
+    const arrowMesh = this.drawArrow()
 
-    this.camera.position.z = 5;
+    //this.scene.add(arrowMesh)
+    sphereMesh.add(arrowMesh)
+
+    this.camera.position.z = 5
+    this.camera.lookAt(0, 0)
 
     const animate = () => {
       requestAnimationFrame( animate )
-
-      sphere.rotation.y += 0.001;
 
       this.renderer.render( this.scene, this.camera )
     };
