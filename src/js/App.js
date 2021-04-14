@@ -5,10 +5,10 @@ import {
   Route,
 } from "react-router-dom";
 import { Provider } from 'react-redux'
-import ThreePanorama from './components/ThreePanorama'
-import Slider from './pages/Slider'
+import Slider from './pages/slider'
 import Redux from './redux/index'
 import { createStore } from 'redux';
+import Panorama from './threejs/index';
 
 const store = createStore(
   Redux.Reducers, 
@@ -18,7 +18,9 @@ const store = createStore(
 
 export class App extends Component {
   componentDidMount() {
-    new ThreePanorama(this.mount)
+    fetch('/data.json')
+      .then(r => r.json())
+      .then(data => new Panorama(data.data, this.mount))
   }
 
 
