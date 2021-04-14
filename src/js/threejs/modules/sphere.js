@@ -1,10 +1,9 @@
 import * as THREE from 'three'
+import Model from './model'
 
-export default class Sphere{
-  #opacity
-  #sphere
-
+export default class Sphere extends Model{
   constructor(path){
+    super()
     this.mesh = this.#createMesh(path)
   }
 
@@ -16,11 +15,7 @@ export default class Sphere{
     const material = new THREE.MeshBasicMaterial()
     material.map = loader.load(path);
 
-    return new THREE.Mesh( geometry, material )
-  }
-
-  move = (x, y, z) => {
-    this.mesh.position.set(x, y, z)
+    return new THREE.Mesh(geometry, material)
   }
 
   changeTexture = (path) => {
