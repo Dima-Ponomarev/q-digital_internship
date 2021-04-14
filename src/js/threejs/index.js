@@ -34,7 +34,13 @@ export default class Panorama{
     this.#renderer.setSize( this.#sizes.width, this.#sizes.height )
     this.root.appendChild( this.#renderer.domElement )
 
-    const mainSphere = new Sphere(this.data[0].path)
+    const defaultTexture = new THREE.TextureLoader().load('/locations/defaultTexture.png')
+    const defaultLocation = new Location(this.data[0])
+
+    const mainSphere = new Sphere(defaultLocation.texture)
+    const otherSphere = new Sphere(defaultTexture)
+    otherSphere.move(0, 0, -100)
+
     const arrow = new Arrow()
     arrow.move(0, -2, 0)
 
