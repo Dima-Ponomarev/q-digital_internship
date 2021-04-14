@@ -5,7 +5,7 @@ import {
   Route,
 } from "react-router-dom";
 import { Provider } from 'react-redux'
-import ThreeScene from './components/ThreeScene'
+import ThreePanorama from './components/ThreePanorama'
 import Slider from './pages/Slider'
 import Redux from './redux/index'
 import { createStore } from 'redux';
@@ -18,7 +18,7 @@ const store = createStore(
 
 export class App extends Component {
   componentDidMount() {
-    new ThreeScene(this.mount)
+    new ThreePanorama(this.mount)
   }
 
 
