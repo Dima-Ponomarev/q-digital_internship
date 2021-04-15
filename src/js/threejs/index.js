@@ -19,15 +19,60 @@ export default class Panorama{
     this.loader = new THREE.TextureLoader()
     this.defaultTexture = this.loader.load('/locations/defaultTexture.png')
 
-    this.currentLocation = 0;    
+    this.currentLocation = 0;
+
     this.locations = [new Location(this.data[this.currentLocation], this.loader)]
     this.mainSphere = new Sphere(this.locations[this.currentLocation].texture)
     this.otherSphere = new Sphere(this.defaultTexture)
+    this.arrows = []
 
     this.init()
+    this.#loadSiblings(this.locations[this.currentLocation])
+  }
+
+  #loadSiblings = (location) => {
+    //List of loaded ids
+    const loadedIdList = this.locations.map(location => location.id)
+
+    //load sibling and push to locations array if its not loaded
+    location.siblings.forEach(sibling => {
+      if (!loadedIdList.includes(sibling)){
+        this.locations.push(new Location(this.data[sibling], this.loader))
+      }
+    })
+  }
+
+  #createArrows = () => {
+    const current = this.data[this.currentLocation]
+
+    //Create new arrow for each sibling
+    this.data.forEach(location => {
+      if (current.siblings.includes(location.id)){
+        const newArrow = new Arrow(
+          location.coords.x, 
+          location.coords.y, 
+          location.coords.z
+        )
+        this.arrows.push(newArrow)
+      }
+    })
+
+    this.#drawArrows()
+  }
+
+  #drawArrows = () => {
+    this.arrows.forEach(arrow => {
+      this.#scene.add(arrow.pivot)
+    })
   }
 
   init = () => {
+    //variables for mouse events
+    let isUserInteracting = false,
+      onMouseDownY = 0, onMouseDownX = 0,
+      lon = -90, onMouseDownLon = 0,
+      lat = 0, onMouseDownLat = 0
+    const dragFactor = 0.15    
 
 
     this.#scene = new THREE.Scene()
@@ -37,7 +82,6 @@ export default class Panorama{
       0.1, 
       1000 
     )
-    this.#camera.lookAt(0, 0, 0)
     this.#camera.position.z = 5
 
 
@@ -45,21 +89,60 @@ export default class Panorama{
     this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
     this.root.appendChild(this.#renderer.domElement)
 
-    this.otherSphere.move(0, 0, -100)
-
-    const arrow = new Arrow()
-    arrow.move(0, -2, 0)
+    this.otherSphere.move(0, 0, 1000)
 
     this.#scene.add(this.mainSphere.mesh)
-    this.#scene.add(arrow.mesh)
+    this.#scene.add(this.otherSphere.mesh)
+    this.#createArrows()
+
 
     const animate = () => {
       requestAnimationFrame(animate)
+
+      this.arrows[0].update()
+
+      if (isUserInteracting){
+        lat = Math.max(-85, Math.min(85, lat))
+
+        const phi = THREE.Math.degToRad(90 - lat)
+        const theta = THREE.Math.degToRad(lon)
+
+        const x = 500 * Math.sin(phi) * Math.cos(theta)
+        const y = 500 * Math.cos(phi)
+        const z = 500 * Math.sin(phi) * Math.sin(theta)
+
+        this.#camera.lookAt(x, y, z)
+      }
 
       this.#renderer.render(this.#scene, this.#camera)
     };
 
     animate()
+
+    //dragging functions
+    const mouseDownHandler = (e) => {
+      onMouseDownX = e.clientX
+      onMouseDownY = e.clientY
+      isUserInteracting = true
+
+      onMouseDownLon = lon
+      onMouseDownLat = lat
+
+      document.addEventListener('mousemove', mouseMoveHandler)
+      document.addEventListener('mouseup', mouseUpHandler)
+    }
+
+    const mouseMoveHandler = (e) => {
+      lon = ( onMouseDownX - e.clientX) * dragFactor + onMouseDownLon
+      lat = (e.clientY - onMouseDownY) * dragFactor + onMouseDownLat
+    }
+
+    const mouseUpHandler = (e) => {
+      isUserInteracting = false
+
+      document.removeEventListener('mousemove', mouseMoveHandler)
+      document.removeEventListener('mouseup', mouseUpHandler)
+    }
 
     //handle resize
     window.addEventListener('resize', () => {
@@ -72,6 +155,6 @@ export default class Panorama{
       this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
     })
 
-
+    this.root.addEventListener('mousedown', mouseDownHandler)
   }
 }

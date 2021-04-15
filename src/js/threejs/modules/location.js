@@ -1,6 +1,6 @@
 export default class Location {
   constructor(data, loader){
-    this.data = data
+    this.id = data.id
     this.position = data.coords
     this.siblings = data.siblings
     this.#load(loader, data.path)
@@ -9,4 +9,5 @@ export default class Location {
   #load = (loader, path) => {
     this.texture = loader.load(path)
   }
+
 }
