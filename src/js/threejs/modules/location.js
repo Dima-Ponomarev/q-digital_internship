@@ -1,11 +1,14 @@
 import * as THREE from 'three'
 
 export default class Location {
-  constructor(data){
-    this.id = data.id
-    this.coords = data.coords
-    this.description = data.description
+  constructor(data, loader){
+    this.data = data
+    this.position = data.coords
     this.siblings = data.siblings
-    this.texture = new THREE.TextureLoader().load(data.path)
+    this.#load(loader, data.path)
+  }
+
+  #load = (loader, path) => {
+    this.texture = loader.load(path)
   }
 }
