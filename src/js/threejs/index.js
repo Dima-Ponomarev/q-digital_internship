@@ -15,10 +15,12 @@ export default class Panorama{
   constructor(data, root){
     this.data = data
     this.root = root
+    this.loader = new THREE.TextureLoader()
     this.init()
   }
 
   init = () => {
+
     this.#scene = new THREE.Scene()
     this.#camera = new THREE.PerspectiveCamera(
       90, 
@@ -26,18 +28,18 @@ export default class Panorama{
       0.1, 
       1000 
     )
+    this.#camera.lookAt(0, 0, 0)
     this.#camera.position.z = 5
-    this.#camera.lookAt(0, 0)
 
 
     this.#renderer = new THREE.WebGLRenderer({ antialias: true })
-    this.#renderer.setSize( this.#sizes.width, this.#sizes.height )
-    this.root.appendChild( this.#renderer.domElement )
+    this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
+    this.root.appendChild(this.#renderer.domElement)
 
     const defaultTexture = new THREE.TextureLoader().load('/locations/defaultTexture.png')
-    const defaultLocation = new Location(this.data[0])
+    const currentLocation = new Location(this.data[0], this.loader)
 
-    const mainSphere = new Sphere(defaultLocation.texture)
+    const mainSphere = new Sphere(currentLocation.texture)
     const otherSphere = new Sphere(defaultTexture)
     otherSphere.move(0, 0, -100)
 
@@ -48,13 +50,12 @@ export default class Panorama{
     this.#scene.add(arrow.mesh)
 
     const animate = () => {
-      requestAnimationFrame( animate )
+      requestAnimationFrame(animate)
 
-      this.#renderer.render( this.#scene, this.#camera )
+      this.#renderer.render(this.#scene, this.#camera)
     };
 
     animate()
-
 
     //handle resize
     window.addEventListener('resize', () => {
@@ -64,7 +65,9 @@ export default class Panorama{
       this.#camera.aspect = this.#sizes.width / this.#sizes.height
       this.#camera.updateProjectionMatrix()
 
-      this.#renderer.setSize( this.#sizes.width, this.#sizes.height )
+      this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
     })
+
+
   }
 }

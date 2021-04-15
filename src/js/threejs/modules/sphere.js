@@ -9,7 +9,7 @@ export default class Sphere extends Model{
 
   #createMesh = (texture) => {
     const geometry = new THREE.SphereGeometry(500, 60, 40)
-    geometry.scale( - 1, 1, 1 )
+    geometry.scale(- 1, 1, 1)
 
     const material = new THREE.MeshBasicMaterial()
     material.map = texture;
@@ -17,9 +17,8 @@ export default class Sphere extends Model{
     return new THREE.Mesh(geometry, material)
   }
 
-  changeTexture = (path) => {
-    const loader = new THREE.TextureLoader()
-    this.mesh.material.map = loader.load(path) 
+  changeTexture = (texture) => {
+    this.mesh.material.map = texture
   }
 
   setOpacity = (value) => {
