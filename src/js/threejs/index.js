@@ -15,11 +15,20 @@ export default class Panorama{
   constructor(data, root){
     this.data = data
     this.root = root
+
     this.loader = new THREE.TextureLoader()
+    this.defaultTexture = this.loader.load('/locations/defaultTexture.png')
+
+    this.currentLocation = 0;    
+    this.locations = [new Location(this.data[this.currentLocation], this.loader)]
+    this.mainSphere = new Sphere(this.locations[this.currentLocation].texture)
+    this.otherSphere = new Sphere(this.defaultTexture)
+
     this.init()
   }
 
   init = () => {
+
 
     this.#scene = new THREE.Scene()
     this.#camera = new THREE.PerspectiveCamera(
@@ -36,17 +45,12 @@ export default class Panorama{
     this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
     this.root.appendChild(this.#renderer.domElement)
 
-    const defaultTexture = new THREE.TextureLoader().load('/locations/defaultTexture.png')
-    const currentLocation = new Location(this.data[0], this.loader)
-
-    const mainSphere = new Sphere(currentLocation.texture)
-    const otherSphere = new Sphere(defaultTexture)
-    otherSphere.move(0, 0, -100)
+    this.otherSphere.move(0, 0, -100)
 
     const arrow = new Arrow()
     arrow.move(0, -2, 0)
 
-    this.#scene.add(mainSphere.mesh)
+    this.#scene.add(this.mainSphere.mesh)
     this.#scene.add(arrow.mesh)
 
     const animate = () => {

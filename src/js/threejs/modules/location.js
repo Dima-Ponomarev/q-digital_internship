@@ -1,5 +1,3 @@
-import * as THREE from 'three'
-
 export default class Location {
   constructor(data, loader){
     this.data = data
