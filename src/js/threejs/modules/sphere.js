@@ -12,6 +12,7 @@ export default class Sphere extends Model{
     geometry.scale(- 1, 1, 1)
 
     const material = new THREE.MeshBasicMaterial()
+    material.transparent = true
     material.map = texture;
 
     return new THREE.Mesh(geometry, material)

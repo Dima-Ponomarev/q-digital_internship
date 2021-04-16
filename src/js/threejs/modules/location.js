@@ -3,6 +3,7 @@ export default class Location {
     this.id = data.id
     this.position = data.coords
     this.siblings = data.siblings
+    this.direction = data.direction
     this.#load(loader, data.path)
   }
 
