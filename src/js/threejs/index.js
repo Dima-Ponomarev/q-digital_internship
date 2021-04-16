@@ -29,8 +29,6 @@ export default class Panorama{
 
     this.init()
     this.#loadSiblings(this.currentLocation)
-
-    console.log(this.locations)
   }
 
   #renderNextLocation = (id) => {
@@ -57,6 +55,15 @@ export default class Panorama{
       .subVectors(destination, source)
       .multiplyScalar(1000)
 
+    //rotate second sphere to direction angle from data if specified
+    //wrong
+    if (this.currentLocation.direction){
+      const rad = THREE.Math.degToRad(this.currentLocation.direction)
+      this.otherSphere.mesh.rotateY(-rad)
+    } else {
+      this.otherSphere.mesh.rotateY(0)
+    }
+
       
     //Move second sphere to that location and change camera view
     this.#camera.lookAt(positionVec)
@@ -68,8 +75,6 @@ export default class Panorama{
 
     //start moving second sphere and changing opacity
     this.isTransitioning = true
-
-
   }
 
   #loadSiblings = (location) => {
@@ -108,15 +113,29 @@ export default class Panorama{
     })
   }
 
+  #setCameraPosition = (lat, lon) => {
+    lat = Math.max(-85, Math.min(85, lat))
+  
+    const phi = THREE.Math.degToRad(90 - lat)
+    const theta = THREE.Math.degToRad(lon)
+
+    const x = 500 * Math.sin(phi) * Math.cos(theta)
+    const y = 500 * Math.cos(phi)
+    const z = 500 * Math.sin(phi) * Math.sin(theta)
+
+    this.#camera.lookAt(x, y, z)
+  }
+
   init = () => {
     //variables for mouse events
     let isUserInteracting = false,
       onMouseDownY = 0, onMouseDownX = 0,
       lon = 0, onMouseDownLon = 0,
       lat = 0, onMouseDownLat = 0,
-      mainOpacity = 1, otherOpacity = 0,
-      moveFactor = 0.1
-      const dragFactor = 0.15    
+      mainOpacity = 1, otherOpacity = 0
+
+    const moveFactor = 0.1 
+    const dragFactor = 0.15    
 
 
     this.#scene = new THREE.Scene()
@@ -140,7 +159,7 @@ export default class Panorama{
     this.#scene.add(this.otherSphere.mesh)
     //this.#createArrows()
 
-    setTimeout(() => this.#renderNextLocation(2), 2000)
+    setTimeout(() => this.#renderNextLocation(1), 2000)
 
 
     const animate = () => {
@@ -157,38 +176,39 @@ export default class Panorama{
               0,
               this.otherSphere.mesh.position.z - (this.otherSphere.mesh.position.z * moveFactor)
             )
-            if (Math.abs(this.otherSphere.mesh.position.x) < 0.1){
+            if (Math.abs(this.otherSphere.mesh.position.x) < 0.2){
               this.otherSphere.mesh.position.x = 0
             }
-            if (Math.abs(this.otherSphere.mesh.position.x) < 0.1){
+            if (Math.abs(this.otherSphere.mesh.position.x) < 0.2){
               this.otherSphere.mesh.position.z = 0
             }
         } else{
           console.log('end')
           this.isTransitioning = false
+
           this.mainSphere.changeTexture(this.currentLocation.texture)
           this.otherSphere.changeTexture(this.defaultTexture)
+          this.otherSphere.move(1000, 0, 0)
+          
           mainOpacity = 1
           otherOpacity = 0
           this.mainSphere.setOpacity(mainOpacity)
           this.otherSphere.setOpacity(otherOpacity)
+          
+          if(this.currentLocation.direction){
+            lon = -this.currentLocation.direction
+          } else {
+            //wrong
+            lon = 180
+          }
+          this.#setCameraPosition(lat, lon)
+
 
         }
 
       } else {
         if (isUserInteracting){
-          lat = Math.max(-85, Math.min(85, lat))
-  
-          const phi = THREE.Math.degToRad(90 - lat)
-          const theta = THREE.Math.degToRad(lon)
-  
-          const x = 500 * Math.sin(phi) * Math.cos(theta)
-          const y = 500 * Math.cos(phi)
-          const z = 500 * Math.sin(phi) * Math.sin(theta)
-  
-          console.log(x, y, z)
-  
-          this.#camera.lookAt(x, y, z)
+          this.#setCameraPosition(lat, lon)
         }
       }
 
