@@ -32,20 +32,25 @@ export default class Panorama{
   }
 
   #renderNextLocation = (id) => {
+
+    this.#deleteArrows()
+
+    //find chosen location by id and load if necessary
     const loadedIdList = this.locations.map(location => location.id)
+    let nextLocation
 
     if (!loadedIdList.includes(id)){
       this.locations.push(new Location(this.data[id], this.loader))
-      this.currentLocation = this.locations[this.locations.length - 1]
+      nextLocation = this.locations[this.locations.length - 1]
     } else {
-      this.currentLocation = this.locations.find(location => location.id === id)
+      nextLocation = this.locations.find(location => location.id === id)
     }
-  
-    this.otherSphere.changeTexture(this.currentLocation.texture)
+
+    this.otherSphere.changeTexture(nextLocation.texture)
 
     //Find out the position where 
     //the next location is placed relative to current
-    const {x, y, z} = this.currentLocation.position
+    const {x, y, z} = nextLocation.position
     const destination = new THREE.Vector3(x, y, z)
 
     const {cx, cy, cz} = this.currentLocation.position
@@ -54,6 +59,8 @@ export default class Panorama{
     const positionVec = new THREE.Vector3()
       .subVectors(destination, source)
       .multiplyScalar(1000)
+    
+    this.currentLocation = nextLocation
 
     //rotate second sphere to direction angle from data if specified
     //wrong
@@ -109,8 +116,14 @@ export default class Panorama{
   #drawArrows = () => {
     this.arrows.forEach(arrow => {
       this.#scene.add(arrow.mesh)
-      //arrow.move(-4, -2, 4)
     })
+  }
+
+  #deleteArrows = () => {
+    this.arrows.forEach(arrow => {
+      this.#scene.remove(arrow.mesh)
+    })
+    this.arrows = []
   }
 
   #setCameraPosition = (lat, lon) => {
@@ -135,7 +148,7 @@ export default class Panorama{
       mainOpacity = 1, otherOpacity = 0
 
     const moveFactor = 0.1 
-    const dragFactor = 0.15    
+    const dragFactor = 0.1    
 
 
     this.#scene = new THREE.Scene()
@@ -157,9 +170,10 @@ export default class Panorama{
 
     this.#scene.add(this.mainSphere.mesh)
     this.#scene.add(this.otherSphere.mesh)
-    //this.#createArrows()
+    this.#createArrows()
 
-    setTimeout(() => this.#renderNextLocation(1), 2000)
+    setTimeout(() => this.#renderNextLocation(3), 2000)
+    //setTimeout(() => this.#renderNextLocation(6), 15000)
 
 
     const animate = () => {
@@ -183,7 +197,6 @@ export default class Panorama{
               this.otherSphere.mesh.position.z = 0
             }
         } else{
-          console.log('end')
           this.isTransitioning = false
 
           this.mainSphere.changeTexture(this.currentLocation.texture)
@@ -201,9 +214,10 @@ export default class Panorama{
             //wrong
             lon = 180
           }
+          console.log(this)
           this.#setCameraPosition(lat, lon)
-
-
+          this.#loadSiblings(this.currentLocation)          
+          this.#createArrows()
         }
 
       } else {
@@ -214,7 +228,6 @@ export default class Panorama{
 
       this.#renderer.render(this.#scene, this.#camera)
     };
-
     animate()
 
     //dragging functions
