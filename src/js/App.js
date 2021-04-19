@@ -8,7 +8,8 @@ import { Provider } from 'react-redux'
 import Slider from './pages/slider'
 import Redux from './redux/index'
 import { createStore } from 'redux';
-import Panorama from './threejs/index';
+
+import ThreeScene from './pages/threeScene'
 
 const store = createStore(
   Redux.Reducers, 
@@ -17,20 +18,13 @@ const store = createStore(
 )
 
 export class App extends Component {
-  componentDidMount() {
-    fetch('/data.json')
-      .then(r => r.json())
-      .then(data => new Panorama(data.data, this.mount))
-  }
-
-
   render() {
     return (
       <Provider store={store}>
         <Router> 
           <Switch>
               <Route exact path='/'>
-                <div className='canvas' ref={ref => this.mount = ref}></div>
+                <ThreeScene/>
               </Route>
               <Route path='/slider'>
                 <Slider />

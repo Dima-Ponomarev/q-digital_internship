@@ -67,7 +67,6 @@ export default class Panorama{
       nextLocation.position.y,
       nextLocation.position.z
     ).multiplyScalar(500)
-    .clampScalar(-500, 500)
 
     this.currentLocation = nextLocation
 
@@ -168,7 +167,7 @@ export default class Panorama{
       mainOpacity = 1, otherOpacity = 0
 
     const moveFactor = 0.1 
-    const dragFactor = 0.1    
+    const dragFactor = 0.2    
 
 
     this.#scene = new THREE.Scene()
@@ -214,7 +213,7 @@ export default class Panorama{
             if (Math.abs(this.otherSphere.mesh.position.x) < 0.2){
               this.otherSphere.mesh.position.x = 0
             }
-            if (Math.abs(this.otherSphere.mesh.position.x) < 0.2){
+            if (Math.abs(this.otherSphere.mesh.position.z) < 0.2){
               this.otherSphere.mesh.position.z = 0
             }
         } else{
@@ -222,7 +221,7 @@ export default class Panorama{
 
           this.mainSphere.changeTexture(this.currentLocation.texture)
           this.otherSphere.changeTexture(this.defaultTexture)
-          this.otherSphere.move(2000, 0, 0)
+          this.otherSphere.move(1000, 0, 0)
           
           mainOpacity = 1
           otherOpacity = 0
@@ -233,8 +232,10 @@ export default class Panorama{
             this.#camera.rotateY(THREE.Math.degToRad(this.currentLocation.direction))
            // this.otherSphere.mesh.rotateY(-this.currentLocation.direction)
           }
-          lat = 0
+          console.log(this.#transitionVec)
           lon = 0
+          lat = 0
+
 
           this.#createArrows()
 
