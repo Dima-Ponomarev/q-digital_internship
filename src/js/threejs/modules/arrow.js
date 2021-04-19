@@ -2,18 +2,20 @@ import * as THREE from 'three'
 import Model from './model'
 
 export default class Arrow extends Model{
-  constructor(x, y, z, direction = 0){
+  constructor(x, y, z, locationId, direction = 0){
     super()
-    this.mesh = this.#createMesh(x, y, z, direction)
+    this.mesh = this.#createMesh(x, y, z, locationId, direction)
   }
 
-  #createMesh = (x, y, z, direction) => {
+  #createMesh = (x, y, z, id, direction) => {
     console.log(x, y, z)
     console.log(direction)
-    const radius = 3
+    const radius = 4
 
     const geometry = new THREE.ConeGeometry(0.7, 0.5, 3)
-    const material = new THREE.MeshBasicMaterial({ color: 0x750000 })
+    const material = new THREE.MeshBasicMaterial({ 
+      color: 0x750000
+    })
     const arrowMesh = new THREE.Mesh(geometry, material)
 
     const directionVec = new THREE.Vector3(x, y, z)
@@ -21,6 +23,7 @@ export default class Arrow extends Model{
     
     const pivot = new THREE.Object3D()
     arrowMesh.position.set(0, -2, radius)
+    arrowMesh.userData = {type: 'arrow', id: id}
     pivot.position.set(0, 0, 5)
     x >= 0 ? pivot.rotateY(normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
     : pivot.rotateY(-normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
@@ -28,9 +31,5 @@ export default class Arrow extends Model{
     pivot.add(arrowMesh)
 
     return pivot
-  }
-
-  update = () => {
-    this.mesh.rotation.y += 0.01 
   }
 } 

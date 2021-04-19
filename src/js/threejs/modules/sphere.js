@@ -13,7 +13,8 @@ export default class Sphere extends Model{
 
     const material = new THREE.MeshBasicMaterial()
     material.transparent = true
-    material.map = texture;
+    material.map = texture
+    material.side = THREE.FrontSide
 
     return new THREE.Mesh(geometry, material)
   }

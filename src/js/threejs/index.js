@@ -7,6 +7,8 @@ export default class Panorama{
   #renderer
   #scene
   #camera
+  #mouse
+  #raycaster
   #sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -114,7 +116,8 @@ export default class Panorama{
           relativeVec.x, 
           relativeVec.y, 
           relativeVec.z,
-          this.currentLocation.direction
+          location.id,
+          this.currentLocation.direction,
         )
         this.arrows.push(newArrow)
       }
@@ -146,8 +149,6 @@ export default class Panorama{
     const y = 500 * Math.cos(phi)
     const z = 500 * Math.sin(phi) * Math.sin(theta)
 
-    console.log(x, y, z)
-
     this.#camera.lookAt(x, y, z)
   }
 
@@ -165,7 +166,7 @@ export default class Panorama{
 
     this.#scene = new THREE.Scene()
     this.#camera = new THREE.PerspectiveCamera(
-      90, 
+      75, 
       this.#sizes.width / this.#sizes.height,
       0.1, 
       1000 
@@ -173,10 +174,12 @@ export default class Panorama{
     this.#camera.position.z = 5
     this.#camera.lookAt(500, 0, 0)
 
-
     this.#renderer = new THREE.WebGLRenderer({ antialias: true })
     this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
     this.root.appendChild(this.#renderer.domElement)
+
+    this.#mouse = new THREE.Vector2()
+    this.#raycaster = new THREE.Raycaster()
 
     this.otherSphere.move(2000, 0, 0)
 
@@ -184,9 +187,21 @@ export default class Panorama{
     this.#scene.add(this.otherSphere.mesh)
     this.#createArrows()
 
-    setTimeout(() => this.#renderNextLocation(1), 2000)
+   // setTimeout(() => this.#renderNextLocation(1), 2000)
    // setTimeout(() => this.#renderNextLocation(0), 15000)
-
+   console.log(this.#scene.children)
+    
+    const clickArrows = () => {
+      this.#raycaster.setFromCamera(this.#mouse, this.#camera)
+      const intersects = this.#raycaster.intersectObjects(this.#scene.children, true)
+      //console.log(intersects)
+      for(let i = 0; i < intersects.length; i++){
+        if (intersects[i].object.userData.type === 'arrow'){
+          this.#renderNextLocation(intersects[i].object.userData.id)
+        }
+       
+      }
+    }
 
     const animate = () => {
       requestAnimationFrame(animate)
@@ -196,6 +211,7 @@ export default class Panorama{
         otherOpacity += 0.02
         this.mainSphere.setOpacity(mainOpacity)
         this.otherSphere.setOpacity(otherOpacity)
+
         if (this.otherSphere.mesh.position.x !== 0 || this.otherSphere.mesh.position.z !== 0){
             this.otherSphere.move(
               this.otherSphere.mesh.position.x - (this.otherSphere.mesh.position.x * moveFactor),
@@ -213,7 +229,7 @@ export default class Panorama{
 
           this.mainSphere.changeTexture(this.currentLocation.texture)
           this.otherSphere.changeTexture(this.defaultTexture)
-          this.otherSphere.move(1000, 0, 0)
+          this.otherSphere.move(2000, 0, 0)
           
           mainOpacity = 1
           otherOpacity = 0
@@ -266,8 +282,7 @@ export default class Panorama{
       document.removeEventListener('mouseup', mouseUpHandler)
     }
 
-    //handle resize
-    window.addEventListener('resize', () => {
+    const resizeHandler = () => {
       this.#sizes.width = window.innerWidth
       this.#sizes.height = window.innerHeight
 
@@ -275,8 +290,22 @@ export default class Panorama{
       this.#camera.updateProjectionMatrix()
 
       this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
-    })
+    }
 
-    this.root.addEventListener('mousedown', mouseDownHandler)
+    const mouseHoverHandler = (e) =>{
+
+      // calculate mouse position in normalized device coordinates
+      // (-1 to +1) for both components
+    
+      this.#mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      this.#mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    
+    }
+
+
+    window.addEventListener('resize', resizeHandler)
+    window.addEventListener('click', clickArrows, false)
+    window.addEventListener('mousemove', mouseHoverHandler, false)
+    this.root.addEventListener('mousedown', mouseDownHandler, false)
   }
 }
