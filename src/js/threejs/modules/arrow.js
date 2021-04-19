@@ -8,8 +8,6 @@ export default class Arrow extends Model{
   }
 
   #createMesh = (x, y, z, id, direction) => {
-    console.log(x, y, z)
-    console.log(direction)
     const radius = 4
 
     const geometry = new THREE.ConeGeometry(0.7, 0.5, 3)
@@ -25,8 +23,12 @@ export default class Arrow extends Model{
     arrowMesh.position.set(0, -2, radius)
     arrowMesh.userData = {type: 'arrow', id: id}
     pivot.position.set(0, 0, 5)
-    x >= 0 ? pivot.rotateY(normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
-    : pivot.rotateY(-normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
+    
+    if (x >= 0){
+      pivot.rotateY(normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
+    } else{
+      pivot.rotateY(-normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
+    }
 
     pivot.add(arrowMesh)
 

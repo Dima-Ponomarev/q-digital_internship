@@ -9,6 +9,7 @@ export default class Panorama{
   #camera
   #mouse
   #raycaster
+  #transitionVec = null
   #sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -61,30 +62,35 @@ export default class Panorama{
 
     //Find out the position where 
     //the next location is placed relative to current
-    const positionVec = this.#getRelativeVector(
+    this.#transitionVec = this.#getRelativeVector(
       nextLocation.position.x,
       nextLocation.position.y,
       nextLocation.position.z
-    ).multiplyScalar(1000)
-    
+    ).multiplyScalar(500)
+    .clampScalar(-500, 500)
+
     this.currentLocation = nextLocation
 
     //rotate second sphere to direction angle from data if specified
     //wrong
-    if (this.currentLocation.direction){
-      const rad = THREE.Math.degToRad(this.currentLocation.direction)
-      this.otherSphere.mesh.rotateY(-rad)
-    } else {
-      this.otherSphere.mesh.rotateY(0)
-    }
+    // if (this.currentLocation.direction){
+    //   this.otherSphere.mesh.rotateY(this.currentLocation.direction)
+    // }
+
+    // this.otherSphere.mesh.lookAt(this.#transitionVec)
+    
+
+
+
 
       
     //Move second sphere to that location and change camera view
-    this.#camera.lookAt(positionVec)
+    console.log(this.#transitionVec)
+    this.#camera.lookAt(this.#transitionVec)
     this.otherSphere.move(
-      positionVec.x, 
-      positionVec.y,
-      positionVec.z
+      this.#transitionVec.x, 
+      this.#transitionVec.y,
+      this.#transitionVec.z
     )
 
     //start moving second sphere and changing opacity
@@ -155,6 +161,7 @@ export default class Panorama{
   init = () => {
     //variables for mouse events
     let isUserInteracting = false,
+      mouseMoved = false,
       onMouseDownY = 0, onMouseDownX = 0,
       lon = 0, onMouseDownLon = 0,
       lat = 0, onMouseDownLat = 0,
@@ -174,6 +181,7 @@ export default class Panorama{
     this.#camera.position.z = 5
     this.#camera.lookAt(500, 0, 0)
 
+
     this.#renderer = new THREE.WebGLRenderer({ antialias: true })
     this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
     this.root.appendChild(this.#renderer.domElement)
@@ -181,27 +189,12 @@ export default class Panorama{
     this.#mouse = new THREE.Vector2()
     this.#raycaster = new THREE.Raycaster()
 
-    this.otherSphere.move(2000, 0, 0)
+    this.otherSphere.move(2000, 0, 2000)
 
     this.#scene.add(this.mainSphere.mesh)
     this.#scene.add(this.otherSphere.mesh)
     this.#createArrows()
 
-   // setTimeout(() => this.#renderNextLocation(1), 2000)
-   // setTimeout(() => this.#renderNextLocation(0), 15000)
-   console.log(this.#scene.children)
-    
-    const clickArrows = () => {
-      this.#raycaster.setFromCamera(this.#mouse, this.#camera)
-      const intersects = this.#raycaster.intersectObjects(this.#scene.children, true)
-      //console.log(intersects)
-      for(let i = 0; i < intersects.length; i++){
-        if (intersects[i].object.userData.type === 'arrow'){
-          this.#renderNextLocation(intersects[i].object.userData.id)
-        }
-       
-      }
-    }
 
     const animate = () => {
       requestAnimationFrame(animate)
@@ -235,16 +228,17 @@ export default class Panorama{
           otherOpacity = 0
           this.mainSphere.setOpacity(mainOpacity)
           this.otherSphere.setOpacity(otherOpacity)
-          
-          if(this.currentLocation.direction){
-            lon = -this.currentLocation.direction
-          } else {
-            //wrong
-            lon = 180
+ 
+          if (this.currentLocation.direction){
+            this.#camera.rotateY(THREE.Math.degToRad(this.currentLocation.direction))
+           // this.otherSphere.mesh.rotateY(-this.currentLocation.direction)
           }
-          this.#setCameraPosition(lat, lon)
-          this.#loadSiblings(this.currentLocation)          
+          lat = 0
+          lon = 0
+
           this.#createArrows()
+
+          this.#loadSiblings(this.currentLocation)
         }
 
       } else {
@@ -261,6 +255,7 @@ export default class Panorama{
     const mouseDownHandler = (e) => {
       onMouseDownX = e.clientX
       onMouseDownY = e.clientY
+      mouseMoved = false
       isUserInteracting = true
 
       onMouseDownLon = lon
@@ -271,6 +266,7 @@ export default class Panorama{
     }
 
     const mouseMoveHandler = (e) => {
+      mouseMoved = true
       lon = ( onMouseDownX - e.clientX) * dragFactor + onMouseDownLon
       lat = (e.clientY - onMouseDownY) * dragFactor + onMouseDownLat
     }
@@ -302,9 +298,25 @@ export default class Panorama{
     
     }
 
+    const clickArrowsHandler = () => {
+      if (mouseMoved){
+        console.log('inter')
+        isUserInteracting = false
+        return
+      }
+      this.#raycaster.setFromCamera(this.#mouse, this.#camera)
+      const intersects = this.#raycaster.intersectObjects(this.#scene.children, true)
+      //console.log(intersects)
+      for(let i = 0; i < intersects.length; i++){
+        if (intersects[i].object.userData.type === 'arrow'){
+          this.#renderNextLocation(intersects[i].object.userData.id)
+        }
+      }
+    }
+
 
     window.addEventListener('resize', resizeHandler)
-    window.addEventListener('click', clickArrows, false)
+    window.addEventListener('click', clickArrowsHandler, false)
     window.addEventListener('mousemove', mouseHoverHandler, false)
     this.root.addEventListener('mousedown', mouseDownHandler, false)
   }
