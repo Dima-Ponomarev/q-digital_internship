@@ -31,6 +31,15 @@ export default class Panorama{
     this.#loadSiblings(this.currentLocation)
   }
 
+  #getRelativeVector = (x, y, z) => {
+    const destination = new THREE.Vector3(x, y, z)
+
+    const {x: cx, y: cy, z: cz} = this.currentLocation.position
+    const source = new THREE.Vector3(cx, cy, cz)
+
+    return new THREE.Vector3().subVectors(destination, source)
+  } 
+
   #renderNextLocation = (id) => {
 
     this.#deleteArrows()
@@ -50,15 +59,11 @@ export default class Panorama{
 
     //Find out the position where 
     //the next location is placed relative to current
-    const {x, y, z} = nextLocation.position
-    const destination = new THREE.Vector3(x, y, z)
-
-    const {cx, cy, cz} = this.currentLocation.position
-    const source = new THREE.Vector3(cx, cy, cz)
-
-    const positionVec = new THREE.Vector3()
-      .subVectors(destination, source)
-      .multiplyScalar(1000)
+    const positionVec = this.#getRelativeVector(
+      nextLocation.position.x,
+      nextLocation.position.y,
+      nextLocation.position.z
+    ).multiplyScalar(1000)
     
     this.currentLocation = nextLocation
 
@@ -97,14 +102,19 @@ export default class Panorama{
   }
 
   #createArrows = () => {
-
     //Create new arrow for each sibling
     this.data.forEach(location => {
       if (this.currentLocation.siblings.includes(location.id)){
-        const newArrow = new Arrow(
-          location.coords.x, 
-          location.coords.y, 
+        const relativeVec = this.#getRelativeVector(
+          location.coords.x,
+          location.coords.y,
           location.coords.z
+        )
+        const newArrow = new Arrow(
+          relativeVec.x, 
+          relativeVec.y, 
+          relativeVec.z,
+          this.currentLocation.direction
         )
         this.arrows.push(newArrow)
       }
@@ -135,6 +145,8 @@ export default class Panorama{
     const x = 500 * Math.sin(phi) * Math.cos(theta)
     const y = 500 * Math.cos(phi)
     const z = 500 * Math.sin(phi) * Math.sin(theta)
+
+    console.log(x, y, z)
 
     this.#camera.lookAt(x, y, z)
   }
@@ -172,8 +184,8 @@ export default class Panorama{
     this.#scene.add(this.otherSphere.mesh)
     this.#createArrows()
 
-    setTimeout(() => this.#renderNextLocation(3), 2000)
-    //setTimeout(() => this.#renderNextLocation(6), 15000)
+    setTimeout(() => this.#renderNextLocation(1), 2000)
+   // setTimeout(() => this.#renderNextLocation(0), 15000)
 
 
     const animate = () => {
@@ -214,7 +226,6 @@ export default class Panorama{
             //wrong
             lon = 180
           }
-          console.log(this)
           this.#setCameraPosition(lat, lon)
           this.#loadSiblings(this.currentLocation)          
           this.#createArrows()
