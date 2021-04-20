@@ -40,7 +40,9 @@ export default class Panorama{
     const {x: cx, y: cy, z: cz} = this.currentLocation.position
     const source = new THREE.Vector3(cx, cy, cz)
 
-    return new THREE.Vector3().subVectors(destination, source)
+    const relativeVector = new THREE.Vector3().subVectors(destination, source)
+
+    return relativeVector
   } 
 
   #renderNextLocation = (id) => {
@@ -68,6 +70,11 @@ export default class Panorama{
       nextLocation.position.z
     ).multiplyScalar(500)
 
+    if (this.currentLocation.direction){
+      const normalVector = new THREE.Vector3(0, 1, 0)
+      this.#transitionVec.applyAxisAngle(normalVector, THREE.Math.degToRad(this.currentLocation.direction))
+    }
+
     this.currentLocation = nextLocation
 
     //rotate second sphere to direction angle from data if specified
@@ -84,12 +91,19 @@ export default class Panorama{
 
       
     //Move second sphere to that location and change camera view
+    console.log("looking at")
     console.log(this.#transitionVec)
     this.#camera.lookAt(this.#transitionVec)
+
+    const scaleDownVector = new THREE.Vector3().copy(this.#transitionVec)
+    scaleDownVector.clampScalar(-500, 500)
     this.otherSphere.move(
-      this.#transitionVec.x, 
-      this.#transitionVec.y,
-      this.#transitionVec.z
+      // this.#transitionVec.x, 
+      // this.#transitionVec.y,
+      // this.#transitionVec.z
+      scaleDownVector.x,
+      scaleDownVector.y,
+      scaleDownVector.z
     )
 
     //start moving second sphere and changing opacity
@@ -229,10 +243,11 @@ export default class Panorama{
           this.otherSphere.setOpacity(otherOpacity)
  
           if (this.currentLocation.direction){
-            this.#camera.rotateY(THREE.Math.degToRad(this.currentLocation.direction))
+            // this.#camera.rotateY(THREE.Math.degToRad(this.currentLocation.direction))
            // this.otherSphere.mesh.rotateY(-this.currentLocation.direction)
           }
-          console.log(this.#transitionVec)
+
+         // console.log(this.#transitionVec)
           lon = 0
           lat = 0
 
@@ -301,7 +316,6 @@ export default class Panorama{
 
     const clickArrowsHandler = () => {
       if (mouseMoved){
-        console.log('inter')
         isUserInteracting = false
         return
       }

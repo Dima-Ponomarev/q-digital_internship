@@ -1,12 +1,16 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { setLocations } from '../redux/actions'
 import Panorama from '../threejs/index';
+import Map from '../components/map'
 
 export class ThreeScene extends Component {
     componentDidMount() {
         fetch('/data.json')
           .then(r => r.json())
           .then(data =>{ 
-            new Panorama(data.data, this.mount)           
+            new Panorama(data.data, this.mount)      
+            this.props.setLocations(data)
           })
       }
 
@@ -14,10 +18,17 @@ export class ThreeScene extends Component {
     return (
       <>
         <div id='canvas' ref={ref => this.mount = ref}></div>
-        <div className='modal-map'></div>  
+        <Map />
       </>
     )
   }
 }
 
-export default ThreeScene
+const mapStateToProps = state => ({
+  locations: state.locations.locations
+})
+
+export default connect(
+  null,
+  { setLocations }
+)(ThreeScene)

@@ -1,4 +1,6 @@
-.modal-map{
+.map{
+
+  &__container{
     display: inline-block;
     position: absolute;
     right: 0;
@@ -11,4 +13,16 @@
 
     background: #fff;
     cursor: pointer;
+  }
+  &__dot{
+    width: 20px;
+    height: 20px;
+    background-color: #000;
+    border-radius: 100%;
+    position: absolute;
+
+    &--active{
+      background: #00ff47;
+    }
+  }
 }

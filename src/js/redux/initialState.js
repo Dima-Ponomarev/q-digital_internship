@@ -1,6 +1,7 @@
 
 const initialState = {
-  images: {}
+  images: {},
+  locations: {}
 }
 
 export default initialState
