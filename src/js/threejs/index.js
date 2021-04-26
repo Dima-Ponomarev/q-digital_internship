@@ -14,6 +14,10 @@ export default class Panorama{
     width: window.innerWidth,
     height: window.innerHeight
   }
+  #theta = 0
+  #phi = 0
+  #lat = 0
+  #lon = 0
 
   constructor(data, root){
     this.data = data
@@ -41,8 +45,8 @@ export default class Panorama{
     const source = new THREE.Vector3(cx, cy, cz)
 
     const relativeVector = new THREE.Vector3().subVectors(destination, source)
-
-    return relativeVector
+    const len_vec = Math.sqrt(relativeVector.x ** 2 + relativeVector.y ** 2 + relativeVector.z ** 2);
+    return relativeVector.divideScalar(len_vec)
   } 
 
   #renderNextLocation = (id) => {
@@ -77,30 +81,14 @@ export default class Panorama{
 
     this.currentLocation = nextLocation
 
-    //rotate second sphere to direction angle from data if specified
-    //wrong
-    // if (this.currentLocation.direction){
-    //   this.otherSphere.mesh.rotateY(this.currentLocation.direction)
-    // }
-
-    // this.otherSphere.mesh.lookAt(this.#transitionVec)
-    
-
-
-
 
       
     //Move second sphere to that location and change camera view
-    console.log("looking at")
-    console.log(this.#transitionVec)
     this.#camera.lookAt(this.#transitionVec)
 
     const scaleDownVector = new THREE.Vector3().copy(this.#transitionVec)
     scaleDownVector.clampScalar(-500, 500)
     this.otherSphere.move(
-      // this.#transitionVec.x, 
-      // this.#transitionVec.y,
-      // this.#transitionVec.z
       scaleDownVector.x,
       scaleDownVector.y,
       scaleDownVector.z
@@ -158,15 +146,15 @@ export default class Panorama{
     this.arrows = []
   }
 
-  #setCameraPosition = (lat, lon) => {
-    lat = Math.max(-85, Math.min(85, lat))
+  #setCameraPosition = () => {
+    this.#lat = Math.max(-85, Math.min(85, this.#lat))
   
-    const phi = THREE.Math.degToRad(90 - lat)
-    const theta = THREE.Math.degToRad(lon)
+    this.#phi = THREE.Math.degToRad(90 - this.#lat)
+    this.#theta = THREE.Math.degToRad(this.#lon)
 
-    const x = 500 * Math.sin(phi) * Math.cos(theta)
-    const y = 500 * Math.cos(phi)
-    const z = 500 * Math.sin(phi) * Math.sin(theta)
+    const x = 500 * Math.sin(this.#phi) * Math.cos(this.#theta)
+    const y = 500 * Math.cos(this.#phi)
+    const z = 500 * Math.sin(this.#phi) * Math.sin(this.#theta)
 
     this.#camera.lookAt(x, y, z)
   }
@@ -176,8 +164,7 @@ export default class Panorama{
     let isUserInteracting = false,
       mouseMoved = false,
       onMouseDownY = 0, onMouseDownX = 0,
-      lon = 0, onMouseDownLon = 0,
-      lat = 0, onMouseDownLat = 0,
+      onMouseDownLon = 0, onMouseDownLat = 0,
       mainOpacity = 1, otherOpacity = 0
 
     const moveFactor = 0.1 
@@ -248,8 +235,8 @@ export default class Panorama{
           }
 
          // console.log(this.#transitionVec)
-          lon = 0
-          lat = 0
+          this.#lon = 0
+          this.#lat = 0
 
 
           this.#createArrows()
@@ -259,7 +246,7 @@ export default class Panorama{
 
       } else {
         if (isUserInteracting){
-          this.#setCameraPosition(lat, lon)
+          this.#setCameraPosition()
         }
       }
 
@@ -274,8 +261,8 @@ export default class Panorama{
       mouseMoved = false
       isUserInteracting = true
 
-      onMouseDownLon = lon
-      onMouseDownLat = lat
+      onMouseDownLon = this.#lon
+      onMouseDownLat = this.#lat
 
       document.addEventListener('mousemove', mouseMoveHandler)
       document.addEventListener('mouseup', mouseUpHandler)
@@ -283,8 +270,8 @@ export default class Panorama{
 
     const mouseMoveHandler = (e) => {
       mouseMoved = true
-      lon = ( onMouseDownX - e.clientX) * dragFactor + onMouseDownLon
-      lat = (e.clientY - onMouseDownY) * dragFactor + onMouseDownLat
+      this.#lon = ( onMouseDownX - e.clientX) * dragFactor + onMouseDownLon
+      this.#lat = (e.clientY - onMouseDownY) * dragFactor + onMouseDownLat
     }
 
     const mouseUpHandler = (e) => {
