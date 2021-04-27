@@ -1,4 +1,4 @@
-import { SET_LOCAL, SET_FETCHED, SET_LOCATIONS } from './actionTypes'
+import { SET_LOCAL, SET_FETCHED, SET_LOCATIONS, SET_CURRENT_LOCATION_ID } from './actionTypes'
 
 export function setLocal(images) {
   return {
@@ -18,5 +18,12 @@ export function setLocations(data) {
   return {
     type: SET_LOCATIONS,
     payload: data
+  }
+}
+
+export function setCurrentLocationId(id) {
+  return{
+    type: SET_CURRENT_LOCATION_ID,
+    payload: id
   }
 }

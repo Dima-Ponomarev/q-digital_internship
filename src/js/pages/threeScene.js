@@ -1,34 +1,31 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { setLocations } from '../redux/actions'
+import { setLocations, setCurrentLocationId } from '../redux/actions'
 import Panorama from '../threejs/index';
 import Map from '../components/map'
 
 export class ThreeScene extends Component {
-    componentDidMount() {
-        fetch('/data.json')
-          .then(r => r.json())
-          .then(data =>{ 
-            new Panorama(data.data, this.mount)      
-            this.props.setLocations(data)
-          })
-      }
+  componentDidMount() {
+      fetch('/data.json')
+        .then(r => r.json())
+        .then(data =>{ 
+          this.panorama = new Panorama(data.data, this.mount, this.props.setCurrentLocationId) 
+          this.forceUpdate()
+          this.props.setLocations(data)
+        })
+  }
 
   render() {
     return (
       <>
         <div id='canvas' ref={ref => this.mount = ref}></div>
-        <Map />
+        {this.panorama && <Map onDotClick={this.panorama.renderNextLocation}/>}
       </>
     )
   }
 }
 
-const mapStateToProps = state => ({
-  locations: state.locations.locations
-})
-
 export default connect(
   null,
-  { setLocations }
+  { setLocations, setCurrentLocationId }
 )(ThreeScene)

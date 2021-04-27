@@ -19,7 +19,7 @@ export default class Panorama{
   #lat = 0
   #lon = 0
 
-  constructor(data, root){
+  constructor(data, root, setCurrentLocationId){
     this.data = data
     this.root = root
 
@@ -28,6 +28,8 @@ export default class Panorama{
     this.isTransitioning = false
 
     this.currentLocation = new Location(this.data[0], this.loader)
+    this.setCurrentLocationId = setCurrentLocationId
+    this.setCurrentLocationId(this.currentLocation.id)
 
     this.locations = [this.currentLocation]
     this.mainSphere = new Sphere(this.currentLocation.texture)
@@ -49,7 +51,7 @@ export default class Panorama{
     return relativeVector.divideScalar(len_vec)
   } 
 
-  #renderNextLocation = (id) => {
+  renderNextLocation = (id, animation = true) => {
 
     this.#deleteArrows()
 
@@ -64,38 +66,56 @@ export default class Panorama{
       nextLocation = this.locations.find(location => location.id === id)
     }
 
-    this.otherSphere.changeTexture(nextLocation.texture)
+    if(animation){
 
-    //Find out the position where 
-    //the next location is placed relative to current
-    this.#transitionVec = this.#getRelativeVector(
-      nextLocation.position.x,
-      nextLocation.position.y,
-      nextLocation.position.z
-    ).multiplyScalar(500)
+      this.otherSphere.changeTexture(nextLocation.texture)
 
-    if (this.currentLocation.direction){
-      const normalVector = new THREE.Vector3(0, 1, 0)
-      this.#transitionVec.applyAxisAngle(normalVector, THREE.Math.degToRad(this.currentLocation.direction))
-    }
+      //Find out the position where 
+      //the next location is placed relative to current
+      this.#transitionVec = this.#getRelativeVector(
+        nextLocation.position.x,
+        nextLocation.position.y,
+        nextLocation.position.z
+      ).multiplyScalar(500)
 
-    this.currentLocation = nextLocation
+      if (this.currentLocation.direction){
+        const normalVector = new THREE.Vector3(0, 1, 0)
+        this.#transitionVec.applyAxisAngle(normalVector, THREE.Math.degToRad(this.currentLocation.direction))
+      }
 
+      this.currentLocation = nextLocation
+      this.setCurrentLocationId(this.currentLocation.id)
+        
+      //Move second sphere to that location and change camera view
+      this.#camera.lookAt(this.#transitionVec)
 
-      
-    //Move second sphere to that location and change camera view
-    this.#camera.lookAt(this.#transitionVec)
+      const radius = (Math.hypot(
+        this.#transitionVec.x, 
+        this.#transitionVec.x, 
+        this.#transitionVec.x
+      ))
+      this.#phi = Math.acos(this.#transitionVec.y / radius);
+      this.#theta = Math.atan2(this.#transitionVec.z, this.#transitionVec.x);
+      this.#lon = THREE.Math.radToDeg(this.#theta);
+      this.#lat = 90 - THREE.Math.radToDeg(this.#phi);
 
-    const scaleDownVector = new THREE.Vector3().copy(this.#transitionVec)
+      const scaleDownVector = new THREE.Vector3().copy(this.#transitionVec)
     scaleDownVector.clampScalar(-500, 500)
-    this.otherSphere.move(
-      scaleDownVector.x,
-      scaleDownVector.y,
-      scaleDownVector.z
-    )
+      this.otherSphere.move(
+        scaleDownVector.x,
+        scaleDownVector.y,
+        scaleDownVector.z
+      )
 
-    //start moving second sphere and changing opacity
-    this.isTransitioning = true
+      //start moving second sphere and changing opacity
+      this.isTransitioning = true
+    } else {
+      this.currentLocation = nextLocation
+      this.setCurrentLocationId(this.currentLocation.id)
+      this.mainSphere.changeTexture(this.currentLocation.texture)
+      this.#createArrows()
+      this.#loadSiblings(this.currentLocation)
+    }
   }
 
   #loadSiblings = (location) => {
@@ -228,16 +248,6 @@ export default class Panorama{
           otherOpacity = 0
           this.mainSphere.setOpacity(mainOpacity)
           this.otherSphere.setOpacity(otherOpacity)
- 
-          if (this.currentLocation.direction){
-            // this.#camera.rotateY(THREE.Math.degToRad(this.currentLocation.direction))
-           // this.otherSphere.mesh.rotateY(-this.currentLocation.direction)
-          }
-
-         // console.log(this.#transitionVec)
-          this.#lon = 0
-          this.#lat = 0
-
 
           this.#createArrows()
 
@@ -311,7 +321,7 @@ export default class Panorama{
       //console.log(intersects)
       for(let i = 0; i < intersects.length; i++){
         if (intersects[i].object.userData.type === 'arrow'){
-          this.#renderNextLocation(intersects[i].object.userData.id)
+          this.renderNextLocation(intersects[i].object.userData.id)
         }
       }
     }

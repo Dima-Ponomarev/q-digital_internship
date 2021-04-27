@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { SET_LOCAL, SET_FETCHED, SET_LOCATIONS } from './actionTypes'
+import { SET_LOCAL, SET_FETCHED, SET_LOCATIONS, SET_CURRENT_LOCATION_ID } from './actionTypes'
 import initialState from './initialState'
 
 const imageReducer = (state = initialState, action) => {
@@ -25,6 +25,11 @@ const locationsReducer = (state = initialState, action) => {
       return {
         ...state,
         locations: action.payload
+      }
+    case SET_CURRENT_LOCATION_ID:
+      return {
+        ...state,
+        currentLocationId: action.payload
       }
     default:
       return state
