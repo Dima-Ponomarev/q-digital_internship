@@ -199,7 +199,6 @@ export default class Panorama{
       0.1, 
       1000 
     )
-    this.#camera.position.z = 5
     this.#camera.lookAt(500, 0, 0)
 
 
@@ -210,7 +209,7 @@ export default class Panorama{
     this.#mouse = new THREE.Vector2()
     this.#raycaster = new THREE.Raycaster()
 
-    this.otherSphere.move(2000, 0, 2000)
+    this.otherSphere.move(0, 1000, 0)
 
     this.#scene.add(this.mainSphere.mesh)
     this.#scene.add(this.otherSphere.mesh)
@@ -245,7 +244,7 @@ export default class Panorama{
 
           this.mainSphere.changeTexture(this.currentLocation.texture)
           this.otherSphere.changeTexture(this.defaultTexture)
-          this.otherSphere.move(2000, 0, 2000)
+          this.otherSphere.move(0, 1000, 0)
 
           mainOpacity = 1
           otherOpacity = 0

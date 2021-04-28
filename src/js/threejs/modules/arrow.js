@@ -22,7 +22,6 @@ export default class Arrow extends Model{
     const pivot = new THREE.Object3D()
     arrowMesh.position.set(0, -2, radius)
     arrowMesh.userData = {type: 'arrow', id: id}
-    pivot.position.set(0, 0, 5)
     
     if (x >= 0){
       pivot.rotateY(normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
