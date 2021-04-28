@@ -20,7 +20,7 @@
       "z": 0
     },
     "description": "у пекарни",
-    "siblings": [0, 5],
+    "siblings": [0, 4],
     "direction": 130
   },
   {
@@ -29,7 +29,7 @@
     "coords": {
       "x": 1.5,
       "y": 0,
-      "z": 1
+      "z": -1
     },
     "description": "возле рекламы",
     "siblings": [0],
@@ -44,34 +44,34 @@
       "z": 0
     },
     "description": "напротив пекарни",
-    "siblings": [0, 7]
+    "siblings": [0, 6]
   },
   {
-    "id": 5,
+    "id": 4,
     "path": "/locations/pano_2_2.png",
     "coords": {
       "x": 1,
       "y": 0,
-      "z": -10
+      "z": 10
     },
     "description": "слева от пекарни",
-    "siblings": [1, 6],
+    "siblings": [1, 5],
     "direction": 90
   },
   {
-    "id": 6,
+    "id": 5,
     "path": "/locations/pano_2_2_1.png",
     "coords": {
       "x": 1,
       "y": 0,
-      "z": -20
+      "z": 20
     },
     "description": "еще левее пекарни",
-    "siblings": [5],
+    "siblings": [4],
     "direction": 90
   },
   {
-    "id": 7,
+    "id": 6,
     "path": "/locations/pano_4_1.png",
     "coords": {
       "x": -2,

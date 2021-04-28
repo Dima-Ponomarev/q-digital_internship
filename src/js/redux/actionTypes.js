@@ -1,2 +1,4 @@
 export const SET_LOCAL = 'SET_LOCAL'
 export const SET_FETCHED = 'SET_FETCHED'
+export const SET_LOCATIONS = 'SET_LOCATIONS'
+export const SET_CURRENT_LOCATION_ID = 'SET_CURRENT_LOCATION_ID'

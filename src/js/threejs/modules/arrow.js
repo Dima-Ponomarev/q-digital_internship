@@ -1,22 +1,36 @@
 import * as THREE from 'three'
 import Model from './model'
 
-export default class Sphere extends Model{
-  constructor(){
+export default class Arrow extends Model{
+  constructor(x, y, z, locationId, direction = 0){
     super()
-    this.mesh = this.#createMesh()
+    this.mesh = this.#createMesh(x, y, z, locationId, direction)
   }
 
-  #createMesh = () => {
-    const arrowShape = new THREE.Shape()
-    arrowShape.moveTo(1.5, 0);
-    arrowShape.lineTo(0, 0.5);
-    arrowShape.lineTo(-1.5, 0);
+  #createMesh = (x, y, z, id, direction) => {
+    const radius = 4
 
-    const geometry = new THREE.ShapeGeometry(arrowShape)
-    const material = new THREE.MeshBasicMaterial({ color: 0x750000 })
+    const geometry = new THREE.ConeGeometry(0.7, 0.5, 3)
+    const material = new THREE.MeshBasicMaterial({ 
+      color: 0x750000
+    })
     const arrowMesh = new THREE.Mesh(geometry, material)
+
+    const directionVec = new THREE.Vector3(x, y, z)
+    const normalVec = new THREE.Vector3(0, 0, 1)
     
-    return arrowMesh
+    const pivot = new THREE.Object3D()
+    arrowMesh.position.set(0, -2, radius)
+    arrowMesh.userData = {type: 'arrow', id: id}
+    
+    if (x >= 0){
+      pivot.rotateY(normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
+    } else{
+      pivot.rotateY(-normalVec.angleTo(directionVec) + THREE.Math.degToRad(direction))
+    }
+
+    pivot.add(arrowMesh)
+
+    return pivot
   }
 } 
