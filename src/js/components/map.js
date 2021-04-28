@@ -2,18 +2,9 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 export class Map extends Component {
-  // shouldComponentUpdate(nextProps){
-  //   if (this.props.currentLocationId !== nextProps.currentLocationId){
-  //     return true
-  //   }
-  //   return false
-  // }
+
   state = {
     isMapOpened: false
-  }
-
-  componentDidUpdate(){
-    console.log(this.props)
   }
 
   onClick = () => {

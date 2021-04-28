@@ -120,7 +120,6 @@ export default class Panorama{
   }
 
   #loadSiblings = (location) => {
-    //List of loaded ids
     const loadedIdList = this.locations.map(location => location.id)
 
     //load sibling and push to locations array if its not loaded
