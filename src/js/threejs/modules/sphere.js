@@ -2,13 +2,13 @@ import * as THREE from 'three'
 import Model from './model'
 
 export default class Sphere extends Model{
-  constructor(texture){
+  constructor(texture, radius){
     super()
-    this.mesh = this.#createMesh(texture)
+    this.mesh = this.#createMesh(texture, radius)
   }
 
-  #createMesh = (texture) => {
-    const geometry = new THREE.SphereGeometry(500, 60, 40)
+  #createMesh = (texture, radius) => {
+    const geometry = new THREE.SphereGeometry(radius, 60, 40)
     geometry.scale(- 1, 1, 1)
 
     const material = new THREE.MeshBasicMaterial()

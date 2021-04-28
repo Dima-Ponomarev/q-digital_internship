@@ -14,6 +14,7 @@ export default class Panorama{
     width: window.innerWidth,
     height: window.innerHeight
   }
+  #offsetAngle
   #theta = 0
   #phi = 0
   #lat = 0
@@ -32,8 +33,8 @@ export default class Panorama{
     this.setCurrentLocationId(this.currentLocation.id)
 
     this.locations = [this.currentLocation]
-    this.mainSphere = new Sphere(this.currentLocation.texture)
-    this.otherSphere = new Sphere(this.defaultTexture)
+    this.mainSphere = new Sphere(this.currentLocation.texture, 500)
+    this.otherSphere = new Sphere(this.defaultTexture, 499)
     this.arrows = []
 
     this.init()
@@ -76,12 +77,14 @@ export default class Panorama{
         nextLocation.position.x,
         nextLocation.position.y,
         nextLocation.position.z
-      ).multiplyScalar(500)
+      ).multiplyScalar(500)      
 
-      if (this.currentLocation.direction){
-        const normalVector = new THREE.Vector3(0, 1, 0)
-        this.#transitionVec.applyAxisAngle(normalVector, THREE.Math.degToRad(this.currentLocation.direction))
-      }
+      const normalVectorY = new THREE.Vector3(0, 1, 0)
+
+      this.#transitionVec.applyAxisAngle(normalVectorY, THREE.Math.degToRad(nextLocation.direction || 0))
+      
+      this.#offsetAngle = (nextLocation.direction || 0) - (this.currentLocation.direction || 0)
+      this.mainSphere.mesh.rotateY(THREE.Math.degToRad(this.#offsetAngle))
 
       this.currentLocation = nextLocation
       this.setCurrentLocationId(this.currentLocation.id)
@@ -91,20 +94,18 @@ export default class Panorama{
 
       const radius = (Math.hypot(
         this.#transitionVec.x, 
-        this.#transitionVec.x, 
-        this.#transitionVec.x
+        this.#transitionVec.y, 
+        this.#transitionVec.z
       ))
       this.#phi = Math.acos(this.#transitionVec.y / radius);
       this.#theta = Math.atan2(this.#transitionVec.z, this.#transitionVec.x);
       this.#lon = THREE.Math.radToDeg(this.#theta);
       this.#lat = 90 - THREE.Math.radToDeg(this.#phi);
 
-      const scaleDownVector = new THREE.Vector3().copy(this.#transitionVec)
-    scaleDownVector.clampScalar(-500, 500)
       this.otherSphere.move(
-        scaleDownVector.x,
-        scaleDownVector.y,
-        scaleDownVector.z
+        this.#transitionVec.x,
+        0,
+        this.#transitionVec.z
       )
 
       //start moving second sphere and changing opacity
@@ -187,7 +188,7 @@ export default class Panorama{
       onMouseDownLon = 0, onMouseDownLat = 0,
       mainOpacity = 1, otherOpacity = 0
 
-    const moveFactor = 0.1 
+    const moveFactor = 0.1
     const dragFactor = 0.2    
 
 
@@ -231,24 +232,26 @@ export default class Panorama{
               0,
               this.otherSphere.mesh.position.z - (this.otherSphere.mesh.position.z * moveFactor)
             )
-            if (Math.abs(this.otherSphere.mesh.position.x) < 0.2){
+            if (Math.abs(this.otherSphere.mesh.position.x) < 0.3){
               this.otherSphere.mesh.position.x = 0
             }
-            if (Math.abs(this.otherSphere.mesh.position.z) < 0.2){
+            if (Math.abs(this.otherSphere.mesh.position.z) < 0.3){
               this.otherSphere.mesh.position.z = 0
             }
         } else{
           this.isTransitioning = false
 
+          this.mainSphere.mesh.rotateY(THREE.Math.degToRad(-this.#offsetAngle))
+
           this.mainSphere.changeTexture(this.currentLocation.texture)
           this.otherSphere.changeTexture(this.defaultTexture)
-          this.otherSphere.move(1000, 0, 0)
-          
+          this.otherSphere.move(2000, 0, 2000)
+
           mainOpacity = 1
           otherOpacity = 0
           this.mainSphere.setOpacity(mainOpacity)
           this.otherSphere.setOpacity(otherOpacity)
-
+            
           this.#createArrows()
 
           this.#loadSiblings(this.currentLocation)
