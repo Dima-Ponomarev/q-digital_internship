@@ -119,7 +119,9 @@ export default class Panorama{
       )
 
       //start moving second sphere and changing opacity
-      this.isTransitioning = true
+      setTimeout(() => {
+        this.isTransitioning = true
+      }, 200)
     } else {
       this.currentLocation = nextLocation
       this.setCurrentLocationId(this.currentLocation.id)
