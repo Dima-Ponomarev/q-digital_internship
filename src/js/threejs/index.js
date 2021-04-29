@@ -19,6 +19,16 @@ export default class Panorama{
   #phi = 0
   #lat = 0
   #lon = 0
+  #isUserInteracting = false
+  #mouseMoved = false
+  #onMouseDownY = 0
+  #onMouseDownX = 0
+  #onMouseDownLon = 0 
+  #onMouseDownLat = 0
+  #mainOpacity = 1 
+  #otherOpacity = 0
+  #moveFactor = 0.1
+  #dragFactor = 0.2    
 
   constructor(data, root, setCurrentLocationId){
     this.data = data
@@ -109,7 +119,9 @@ export default class Panorama{
       )
 
       //start moving second sphere and changing opacity
-      this.isTransitioning = true
+      setTimeout(() => {
+        this.isTransitioning = true
+      }, 200)
     } else {
       this.currentLocation = nextLocation
       this.setCurrentLocationId(this.currentLocation.id)
@@ -179,18 +191,120 @@ export default class Panorama{
     this.#camera.lookAt(x, y, z)
   }
 
+  #animate = () => {
+    requestAnimationFrame(this.#animate)
+
+    if (this.isTransitioning){
+      this.#mainOpacity -= 0.02
+      this.#otherOpacity += 0.02
+      this.mainSphere.setOpacity(this.#mainOpacity)
+      this.otherSphere.setOpacity(this.#otherOpacity)
+
+      if (this.otherSphere.mesh.position.x !== 0 || this.otherSphere.mesh.position.z !== 0){
+          this.otherSphere.move(
+            this.otherSphere.mesh.position.x - (this.otherSphere.mesh.position.x * this.#moveFactor),
+            0,
+            this.otherSphere.mesh.position.z - (this.otherSphere.mesh.position.z * this.#moveFactor)
+          )
+          if (Math.abs(this.otherSphere.mesh.position.x) < 0.3){
+            this.otherSphere.mesh.position.x = 0
+          }
+          if (Math.abs(this.otherSphere.mesh.position.z) < 0.3){
+            this.otherSphere.mesh.position.z = 0
+          }
+      } else{
+        this.isTransitioning = false
+
+        this.mainSphere.mesh.rotateY(THREE.Math.degToRad(-this.#offsetAngle))
+
+        this.mainSphere.changeTexture(this.currentLocation.texture)
+        this.otherSphere.changeTexture(this.defaultTexture)
+        this.otherSphere.move(0, 1000, 0)
+
+        this.#mainOpacity = 1
+        this.#otherOpacity = 0
+        this.mainSphere.setOpacity(this.#mainOpacity)
+        this.otherSphere.setOpacity(this.#otherOpacity)
+          
+        this.#createArrows()
+
+        this.#loadSiblings(this.currentLocation)
+      }
+
+    } else {
+      if (this.#isUserInteracting){
+        this.#setCameraPosition()
+      }
+    }
+
+    this.#renderer.render(this.#scene, this.#camera)
+  };
+
+  //-----Event handlers-----
+
+  #mouseDownHandler = e => {
+    this.#onMouseDownX = e.clientX
+    this.#onMouseDownY = e.clientY
+    this.#mouseMoved = false
+    this.#isUserInteracting = true
+
+    this.#onMouseDownLon = this.#lon
+    this.#onMouseDownLat = this.#lat
+
+    document.addEventListener('mousemove', this.#mouseMoveHandler)
+    document.addEventListener('mouseup', this.#mouseUpHandler)
+  }
+
+  #mouseMoveHandler = e => {
+    setTimeout(() => {
+      this.#mouseMoved = true
+    }, 150)
+    this.#lon = ( this.#onMouseDownX - e.clientX) * this.#dragFactor + this.#onMouseDownLon
+    this.#lat = (e.clientY - this.#onMouseDownY) * this.#dragFactor + this.#onMouseDownLat
+  }
+
+  #mouseUpHandler = () => {
+    this.#isUserInteracting = false
+
+    document.removeEventListener('mousemove', this.#mouseMoveHandler)
+    document.removeEventListener('mouseup', this.#mouseUpHandler)
+  }
+
+  #resizeHandler = () => {
+    this.#sizes.width = window.innerWidth
+    this.#sizes.height = window.innerHeight
+
+    this.#camera.aspect = this.#sizes.width / this.#sizes.height
+    this.#camera.updateProjectionMatrix()
+
+    this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
+  }
+
+  #mouseHoverHandler = (e) =>{
+
+    // calculate mouse position in normalized device coordinates
+    // (-1 to +1) for both components
+  
+    this.#mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    this.#mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  
+  }
+
+  #clickArrowsHandler = () => {
+    if (this.#mouseMoved){
+      this.#isUserInteracting = false
+      return
+    }
+    this.#raycaster.setFromCamera(this.#mouse, this.#camera)
+    const intersects = this.#raycaster.intersectObjects(this.#scene.children, true)
+    for(let i = 0; i < intersects.length; i++){
+      if (intersects[i].object.userData.type === 'arrow'){
+        this.renderNextLocation(intersects[i].object.userData.id)
+      }
+    }
+  }
+
   init = () => {
-    //variables for mouse events
-    let isUserInteracting = false,
-      mouseMoved = false,
-      onMouseDownY = 0, onMouseDownX = 0,
-      onMouseDownLon = 0, onMouseDownLat = 0,
-      mainOpacity = 1, otherOpacity = 0
-
-    const moveFactor = 0.1
-    const dragFactor = 0.2    
-
-
     this.#scene = new THREE.Scene()
     this.#camera = new THREE.PerspectiveCamera(
       75, 
@@ -214,123 +328,11 @@ export default class Panorama{
     this.#scene.add(this.otherSphere.mesh)
     this.#createArrows()
 
+    this.#animate()
 
-    const animate = () => {
-      requestAnimationFrame(animate)
-
-      if (this.isTransitioning){
-        mainOpacity -= 0.02
-        otherOpacity += 0.02
-        this.mainSphere.setOpacity(mainOpacity)
-        this.otherSphere.setOpacity(otherOpacity)
-
-        if (this.otherSphere.mesh.position.x !== 0 || this.otherSphere.mesh.position.z !== 0){
-            this.otherSphere.move(
-              this.otherSphere.mesh.position.x - (this.otherSphere.mesh.position.x * moveFactor),
-              0,
-              this.otherSphere.mesh.position.z - (this.otherSphere.mesh.position.z * moveFactor)
-            )
-            if (Math.abs(this.otherSphere.mesh.position.x) < 0.3){
-              this.otherSphere.mesh.position.x = 0
-            }
-            if (Math.abs(this.otherSphere.mesh.position.z) < 0.3){
-              this.otherSphere.mesh.position.z = 0
-            }
-        } else{
-          this.isTransitioning = false
-
-          this.mainSphere.mesh.rotateY(THREE.Math.degToRad(-this.#offsetAngle))
-
-          this.mainSphere.changeTexture(this.currentLocation.texture)
-          this.otherSphere.changeTexture(this.defaultTexture)
-          this.otherSphere.move(0, 1000, 0)
-
-          mainOpacity = 1
-          otherOpacity = 0
-          this.mainSphere.setOpacity(mainOpacity)
-          this.otherSphere.setOpacity(otherOpacity)
-            
-          this.#createArrows()
-
-          this.#loadSiblings(this.currentLocation)
-        }
-
-      } else {
-        if (isUserInteracting){
-          this.#setCameraPosition()
-        }
-      }
-
-      this.#renderer.render(this.#scene, this.#camera)
-    };
-    animate()
-
-    //dragging functions
-    const mouseDownHandler = (e) => {
-      onMouseDownX = e.clientX
-      onMouseDownY = e.clientY
-      mouseMoved = false
-      isUserInteracting = true
-
-      onMouseDownLon = this.#lon
-      onMouseDownLat = this.#lat
-
-      document.addEventListener('mousemove', mouseMoveHandler)
-      document.addEventListener('mouseup', mouseUpHandler)
-    }
-
-    const mouseMoveHandler = (e) => {
-      mouseMoved = true
-      this.#lon = ( onMouseDownX - e.clientX) * dragFactor + onMouseDownLon
-      this.#lat = (e.clientY - onMouseDownY) * dragFactor + onMouseDownLat
-    }
-
-    const mouseUpHandler = (e) => {
-      isUserInteracting = false
-
-      document.removeEventListener('mousemove', mouseMoveHandler)
-      document.removeEventListener('mouseup', mouseUpHandler)
-    }
-
-    const resizeHandler = () => {
-      this.#sizes.width = window.innerWidth
-      this.#sizes.height = window.innerHeight
-
-      this.#camera.aspect = this.#sizes.width / this.#sizes.height
-      this.#camera.updateProjectionMatrix()
-
-      this.#renderer.setSize(this.#sizes.width, this.#sizes.height)
-    }
-
-    const mouseHoverHandler = (e) =>{
-
-      // calculate mouse position in normalized device coordinates
-      // (-1 to +1) for both components
-    
-      this.#mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      this.#mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    
-    }
-
-    const clickArrowsHandler = () => {
-      if (mouseMoved){
-        isUserInteracting = false
-        return
-      }
-      this.#raycaster.setFromCamera(this.#mouse, this.#camera)
-      const intersects = this.#raycaster.intersectObjects(this.#scene.children, true)
-      //console.log(intersects)
-      for(let i = 0; i < intersects.length; i++){
-        if (intersects[i].object.userData.type === 'arrow'){
-          this.renderNextLocation(intersects[i].object.userData.id)
-        }
-      }
-    }
-
-
-    window.addEventListener('resize', resizeHandler)
-    window.addEventListener('click', clickArrowsHandler, false)
-    window.addEventListener('mousemove', mouseHoverHandler, false)
-    this.root.addEventListener('mousedown', mouseDownHandler, false)
+    window.addEventListener('resize', this.#resizeHandler)
+    window.addEventListener('click', this.#clickArrowsHandler, false)
+    window.addEventListener('mousemove', this.#mouseHoverHandler, false)
+    this.root.addEventListener('mousedown', this.#mouseDownHandler, false)
   }
 }
