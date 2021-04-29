@@ -254,7 +254,9 @@ export default class Panorama{
   }
 
   #mouseMoveHandler = e => {
-    this.#mouseMoved = true
+    setTimeout(() => {
+      this.#mouseMoved = true
+    }, 150)
     this.#lon = ( this.#onMouseDownX - e.clientX) * this.#dragFactor + this.#onMouseDownLon
     this.#lat = (e.clientY - this.#onMouseDownY) * this.#dragFactor + this.#onMouseDownLat
   }
