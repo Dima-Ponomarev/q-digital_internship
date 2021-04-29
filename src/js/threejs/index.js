@@ -10,6 +10,7 @@ export default class Panorama{
   #mouse
   #raycaster
   #transitionVec = null
+  #transitionTimeout
   #sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -66,6 +67,9 @@ export default class Panorama{
 
     this.#deleteArrows()
 
+    //clear previous timeout
+    window.clearTimeout(this.#transitionTimeout)
+
     //find chosen location by id and load if necessary
     const loadedIdList = this.locations.map(location => location.id)
     let nextLocation
@@ -119,7 +123,7 @@ export default class Panorama{
       )
 
       //start moving second sphere and changing opacity
-      setTimeout(() => {
+      this.#transitionTimeout = window.setTimeout(() => {
         this.isTransitioning = true
       }, 200)
     } else {
@@ -256,9 +260,12 @@ export default class Panorama{
   }
 
   #mouseMoveHandler = e => {
-    setTimeout(() => {
+    if (
+      Math.abs(this.#onMouseDownX - e.clientX) > 20 ||
+      Math.abs(this.#onMouseDownY - e.clientY) > 20
+    ){
       this.#mouseMoved = true
-    }, 150)
+    }
     this.#lon = ( this.#onMouseDownX - e.clientX) * this.#dragFactor + this.#onMouseDownLon
     this.#lat = (e.clientY - this.#onMouseDownY) * this.#dragFactor + this.#onMouseDownLat
   }
