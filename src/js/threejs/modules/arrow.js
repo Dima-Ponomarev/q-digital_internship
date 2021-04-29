@@ -10,13 +10,13 @@ export default class Arrow extends Model{
   #createMesh = (x, y, z, id, direction) => {
     const radius = 4
 
-    const coneGeometry = new THREE.ConeGeometry(0.7, 0.5, 3)
+    const coneGeometry = new THREE.ConeGeometry(0.7, 0.3, 3)
     const coneMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x750000
     })
     const arrowMesh = new THREE.Mesh(coneGeometry, coneMaterial)
 
-    const boxGeometry = new THREE.BoxGeometry(1.32, 0.2, 0.01)
+    const boxGeometry = new THREE.BoxGeometry(1.32, 0.15, 0.01)
     const boxMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x5c0000
     })
@@ -27,7 +27,7 @@ export default class Arrow extends Model{
     
     const pivot = new THREE.Object3D()
     arrowMesh.position.set(0, -2, radius)
-    boxMesh.position.set(0, -2.56, radius)
+    boxMesh.position.set(0, -2.43, radius)
     arrowMesh.userData = {type: 'arrow', id: id}
     boxMesh.userData = {type: 'arrow', id: id}
     
